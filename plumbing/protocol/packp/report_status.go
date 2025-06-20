@@ -69,17 +69,18 @@ func (s *ReportStatus) Decode(r io.Reader) error {
 		return err
 	}
 
+	buf := &bytes.Buffer{}
+
 	flushed := false
 	for scan.Scan() {
 		b := scan.Bytes()
 		if isFlush(b) {
 			flushed = true
-			break
 		}
-
-		if err := s.decodeCommandStatus(b); err != nil {
-			return err
-		}
+		buf.Write(b)
+	}
+	if err := s.decodeCommandStatus(buf.Bytes()); err != nil {
+		return err
 	}
 
 	if !flushed {
